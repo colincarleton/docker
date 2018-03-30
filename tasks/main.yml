@@ -1,0 +1,27 @@
+---
+# Loads Default Variables
+- name: Load Default Variables
+  include_vars:
+    dir: '../defaults'
+  when: use_defaults == "true"
+
+# Redhat Setup
+- name: Redhat/CentOS Setup
+  include_tasks: redhat.yml
+  when: ansible_os_family == 'RedHat'
+
+# Debian Setup, currently not functioning
+- name: Debian Setup
+  include_tasks: debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Docker Installation
+  include_tasks: docker-install.yml
+
+- name: Docker Registry
+  include_tasks: docker-registry.yml
+  when: docker_registry
+
+# - name: Docker Node
+#   include_tasks: docker-node.yml
+#   when: docker_node

@@ -1,0 +1,8 @@
+---
+# Load Defaults
+use_defaults: "true"
+
+docker_pull:
+  - docker.elastic.co/cloud-enterprise/elastic-cloud-enterprise:1.1.3
+  - docker.elastic.co/cloud-assets/elasticsearch:6.1.3-0
+  - docker.elastic.co/cloud-assets/kibana:6.1.3-0

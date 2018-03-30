@@ -1,0 +1,28 @@
+---
+- name: Ensure dependencies
+  yum:
+    name: '{{ item }}'
+    state: latest
+  with_items: '{{ docker_yum_dependencies }}'
+
+- name: Download Docker-{{ docker_edition }} repo
+  get_url:
+    url: '{{ docker_yum_repo_url }}'
+    dest: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Enable Docker edge repo
+  ini_file:
+    dest: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
+    section: 'docker-{{ docker_edition }}-edge'
+    option: enabled
+  when: docker_yum_repo_edge
+
+- name: Enable Docker test repo
+  ini_file:
+    dest: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
+    section: 'docker-{{ docker_edition }}-test'
+    option: enabled
+  when: docker_yum_repo_test

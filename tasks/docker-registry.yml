@@ -1,0 +1,21 @@
+---
+- name: Get Docker Status
+  command: /usr/bin/docker stats --no-stream
+  register: docker_stats
+
+- name: Start Registry
+  command: /usr/bin/docker run -d -p 5000:5000 --name registry registry:2
+  # when: docker_stats.stdout.find('registry') == 1
+
+- name: Check Docker Images
+  command: /usr/bin/docker images {{ item }}
+  with_items:
+    - "{{ docker_pull }}"
+  register: test
+
+- name: Pull Docker Images
+  command: /usr/bin/docker pull "{{ item.cmd[-1] }}"
+  async: 600
+  poll: 15
+  with_items: "{{ test.results }}"
+  when: (item.stdout_lines | length != 2)
