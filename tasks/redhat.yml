@@ -5,24 +5,44 @@
     state: latest
   with_items: '{{ docker_yum_dependencies }}'
 
-- name: Download Docker-{{ docker_edition }} repo
+- name: Download docker-{{ docker_edition }} repo
   get_url:
-    url: '{{ docker_yum_repo_url }}'
+    url: '{{ docker_yum_repo }}'
     dest: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
     owner: root
     group: root
     mode: 0644
 
-- name: Enable Docker edge repo
+- name: Enable docker edge repo
   ini_file:
     dest: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
     section: 'docker-{{ docker_edition }}-edge'
     option: enabled
   when: docker_yum_repo_edge
 
-- name: Enable Docker test repo
+- name: Enable docker test repo
   ini_file:
     dest: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
     section: 'docker-{{ docker_edition }}-test'
     option: enabled
   when: docker_yum_repo_test
+
+- name: Setup docker group
+  group:
+    name: docker
+    gid: 2000
+
+- name: Setup docker user
+  user:
+    name: ece
+    comment: "ECE Docker User"
+    uid: 2000
+    group: docker
+
+- name: Create directories
+  file:
+    path: /mnt/data
+    owner: ece
+    group: docker
+    state: directory
+    mode: 01777

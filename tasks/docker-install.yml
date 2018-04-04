@@ -1,5 +1,5 @@
 ---
-- name: Ensure Docker is Absent
+- name: Ensure docker is absent
   package:
     name: '{{ item }}'
     state: absent
@@ -7,30 +7,32 @@
   when: (docker_remove_packages is defined and docker_upgrade == true)
   register: remove_items
 
-- name: Install Docker
+- name: Install docker
   package:
     name: '{{ docker_package }}'
     state: present
 
-- name: Check for Docker-Compose
+- name: Check for docker-compose
   command: docker-compose --version
   register: docker_compose_current_version
   changed_when: false
   failed_when: false
 
-- name: Remove Docker-Compose if not up to date
+- name: Remove docker-compose if not up to date
   file:
     path: "{{ docker_compose_path }}"
     state: absent
   when: >
     docker_compose_current_version.stdout is defined
     and docker_compose_version not in docker_compose_current_version.stdout
+    and docker_upgrade
 
-- name: Install Docker Compose
+- name: Install docker compose
   get_url:
     url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64
     dest: "{{ docker_compose_path }}"
     mode: 0755
+  when: docker_install_compose
 
 - name: Start Docker
   service:

@@ -1,0 +1,8 @@
+---
+- name: Docker registry
+  include_tasks: docker-registry.yml
+  when: docker_registry
+
+- name: Docker node
+  include_tasks: docker-node.yml
+  when: docker_node

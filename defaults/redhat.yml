@@ -1,9 +1,0 @@
----
-# Redhat / CentOS Repo
-docker_yum_repo: https://download.docker.com/linux/centos/docker-{{ docker_edition }}.repo
-docker_yum_repo_edge: false
-docker_yum_repo_test: false
-docker_yum_dependencies:
-  - yum-utils
-  - device-mapper-persistent-data
-  - lvm2
