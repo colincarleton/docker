@@ -1,4 +1,10 @@
 ---
+## --- Docker Settings ------------------------------------------------------ ##
+docker_user: test
+docker_user_uid: 2000
+docker_group: docker
+docker_group_gid: 2000
+
 ## --- Docker Versions ------------------------------------------------------ ##
 docker_version: latest
 docker_edition: 'ce'
@@ -32,11 +38,19 @@ docker_remove_packages:
 
 ## --- Docker Compose ------------------------------------------------------ ##
 docker_install_compose: false
-docker_compose_version: '1.16.1'
+docker_upgrade_compose: false
+docker_compose_version: "1.20.1"
 docker_compose_path: /usr/local/bin/docker-compose
 
 ## --- Docker Registry Settings --------------------------------------------- ##
-docker_registry: false
+docker_registry: true
+docker_registry_hostname: node1.com
+docker_security: true
+docker_certificate_self_signed: true
+docker_certificate_self_signed_subj: /C=US/ST=MN/L=Eden Prairie/O=Optum/OU=DevOps/CN=node1.com
+docker_certificate_dir: "/etc/ssl/certs/docker"
+docker_certificate: "node1.com.crt"
+docker_certificate_key: "node1.com.key"
 docker_pull:
   - docker.elastic.co/cloud-enterprise/elastic-cloud-enterprise:1.1.3
   - docker.elastic.co/cloud-assets/elasticsearch:6.1.3-0

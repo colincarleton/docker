@@ -3,8 +3,61 @@
   command: /usr/bin/docker stats --no-stream
   register: docker_stats
 
+- name: Validate certs directory
+  find:
+    paths: "{{ docker_certificate_dir }}"
+    patterns: ({{ docker_certificate }})|({{ docker_certificate_key }})
+    use_regex: yes
+  register: cert_status
+
+- name: Clean up old certs
+  file:
+    path: "{{ docker_certificate_dir }}/{{ item }}"
+    state: absent
+  with_items:
+    - "{{ docker_certificate }}"
+    - "{{ docker_certificate_key }}"
+  when: cert_status.matched != 2
+  register: certs_absent
+
+- name: Create self signed certs
+  command: openssl req \
+    -newkey rsa:4096 -nodes -sha256 \
+    -keyout {{ docker_certificate_dir }}/{{ docker_certificate_key }} \
+    -x509 -days 365 -out {{ docker_certificate_dir }}/{{ docker_certificate }} \
+    -subj "{{ docker_certificate_self_signed_subj }}"
+  when: (docker_certificate_self_signed and cert_status.matched != 2)
+
+- name: Copy cert to ca-trust
+  copy:
+    src: "{{ docker_certificate_dir }}/{{ docker_certificate }}"
+    dest: /etc/pki/ca-trust/source/anchors/{{ docker_certificate }}
+    remote_src: yes
+
+- name: Update ca store redhat
+  command: /usr/bin/update-ca-trust
+  when: ansible_os_family == 'RedHat'
+
+- name: Update ca store debian
+  command: /usr/sbin/update-ca-certificates
+  when: ansible_os_family == 'Debian'
+
+- name: Start Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
 - name: Start registry
-  command: /usr/bin/docker run -d -p 5000:5000 --name registry registry:2
+  command: /usr/bin/docker run -d \
+    --restart=always \
+    --name registry \
+    -v "{{ docker_certificate_dir }}":"{{ docker_certificate_dir }}"
+    -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
+    -e REGISTRY_HTTP_TLS_CERTIFICATE={{ docker_certificate_dir }}/{{ docker_certificate }} \
+    -e REGISTRY_HTTP_TLS_KEY={{ docker_certificate_dir }}/{{ docker_certificate_key }} \
+    -p 443:443 \
+    registry:2
   when: docker_stats.stdout.find('registry') == -1
 
 - name: Check docker images
@@ -19,3 +72,9 @@
   poll: 15
   with_items: "{{ images.results }}"
   when: (item.stdout_lines | length != 2)
+
+# - name: Tag pulled images
+#   command: /usr/bin/docker tag {{ item }} node1.com/{{ item }}
+#   with_items:
+#     - "{{ docker_pull }}"
+#   register: docker_tagged

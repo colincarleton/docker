@@ -1,4 +1,42 @@
 ---
+- name: Setup docker group
+  group:
+    name: docker
+    gid: "{{ docker_group_gid }}"
+
+- name: Setup docker user
+  user:
+    name: "{{ docker_user }}"
+    comment: "Docker User Account"
+    uid: "{{ docker_user_uid }}"
+    group: "{{ docker_group }}"
+
+- name: Create data directory
+  file:
+    path: /mnt/data
+    owner: "{{ docker_user }}"
+    group: "{{ docker_group }}"
+    state: directory
+    mode: 01755
+
+- name: Create cert directory
+  file:
+    path: /etc/ssl/certs/docker
+    owner: "{{ docker_user }}"
+    group: "{{ docker_group }}"
+    state: directory
+    mode: 01755
+
+# - name: Check for docker installation status
+#   package_facts:
+#     manager: "auto"
+#
+# - name: show them
+#   debug: var=ansible_facts.packages
+
+- name: Docker installation
+  include_tasks: docker-install.yml
+
 - name: Docker registry
   include_tasks: docker-registry.yml
   when: docker_registry

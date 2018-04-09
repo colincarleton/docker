@@ -26,23 +26,3 @@
     section: 'docker-{{ docker_edition }}-test'
     option: enabled
   when: docker_yum_repo_test
-
-- name: Setup docker group
-  group:
-    name: docker
-    gid: 2000
-
-- name: Setup docker user
-  user:
-    name: ece
-    comment: "ECE Docker User"
-    uid: 2000
-    group: docker
-
-- name: Create directories
-  file:
-    path: /mnt/data
-    owner: ece
-    group: docker
-    state: directory
-    mode: 01777

@@ -9,10 +9,6 @@
 #   include_tasks: debian.yml
 #   when: ansible_os_family == 'Debian'
 
-## --- Docker Installation -------------------------------------------------- ##
-- name: Docker installation
-  include_tasks: docker-install.yml
-
 ## --- Docker Configuration ------------------------------------------------- ##
 - name: Docker configuration
   include_tasks: docker-conf.yml

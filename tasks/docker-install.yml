@@ -25,7 +25,7 @@
   when: >
     docker_compose_current_version.stdout is defined
     and docker_compose_version not in docker_compose_current_version.stdout
-    and docker_upgrade
+    and docker_upgrade_compose
 
 - name: Install docker compose
   get_url:
@@ -33,6 +33,13 @@
     dest: "{{ docker_compose_path }}"
     mode: 0755
   when: docker_install_compose
+
+- name: Add registry to hosts
+  lineinfile:
+    dest: /etc/hosts
+    line: "172.128.1.30   {{ docker_registry_hostname }}"
+    state: present
+  when: docker_certificate_self_signed
 
 - name: Start Docker
   service:
